@@ -1,108 +1,110 @@
 var form = document.getElementById('addForm');
 var itemList = document.getElementById('items');
-var button = document.getElementById('info');
-//form submit Event
-form.addEventListener('submit', storeData);
-// Delete Functionality
-itemList.addEventListener('click', removeItem);
+var edit = document.getElementById('edit');
 
-//Store Data:
+
 var userDetail = {
     name: '',
     email: '',
-    phoneNumber: ''
-};
+    number: ''
+}
+
+form.addEventListener('submit', addedUser);
+itemList.addEventListener('click', removeItem);
+itemList.addEventListener('click', editDetails);
+
+
+function addedUser(e) {
+    e.preventDefault();
+    var li = document.createElement('li');
+    userDetail.name = document.getElementById('name').value;
+    userDetail.email = document.getElementById('email').value;
+    userDetail.number = document.getElementById('number').value;
+    var userData = userDetail.name + ' ' + userDetail.email + ' ' + userDetail.number + ' ';
+    axios.post('https://crudcrud.com/api/2cb5a8ec863c4f6aabee0a0bbb4579a6/appointmentData', userDetail)
+        .then(response => {
+            console.log(userDetail);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+
+    li.appendChild(document.createTextNode(userData));
+    //console.log(li);
+
+    var deleteBtn = document.createElement('Button');
+    deleteBtn.className = 'delete';
+    deleteBtn.innerHTML = 'delete';
+    var editBtn = document.createElement('Button');
+    editBtn.className = 'edit';
+    editBtn.innerHTML = 'Edit';
+    li.appendChild((deleteBtn));
+    li.appendChild((editBtn));
+    //console.log(li);
+    itemList.appendChild(li);
+    console.log(itemList);
+}
 window.addEventListener('DOMContentLoaded', () => {
-    axios.get('https://crudcrud.com/api/58c264e795be44e4aea092eb06c2c289/appointmentData')
-        .then((response) => {
-            console.log(response);
+    axios.get('https://crudcrud.com/api/2cb5a8ec863c4f6aabee0a0bbb4579a6/appointmentData', userDetail._id)
+        .then(response => {
             for (var i = 0; i < response.data.length; i++) {
                 var li = document.createElement('li');
-                var list = response.data[i].name + ' ' + response.data[i].email + ' ' + response.data[i].phoneNumber;
-
-                li.appendChild(document.createTextNode(list));
-                var deleteBtn = document.createElement('button');
+                var data = response.data[i].name + ' ' +
+                    response.data[i].email + ' ' + response.data[i].number + ' ';
+                li.appendChild(document.createTextNode(data));
+                var deleteBtn = document.createElement('Button');
                 deleteBtn.className = 'delete';
-                deleteBtn.style.width = '80px';
-                var editBtn = document.createElement('button');
+                deleteBtn.innerHTML = 'delete';
+                deleteBtn.id = response.data[i]._id;
+                var editBtn = document.createElement('Button');
                 editBtn.className = 'edit';
-                editBtn.style.width = '80px';
-                // Append text node for button
-                deleteBtn.appendChild(document.createTextNode('delete'));
-                //Append text node for edit button
-                editBtn.appendChild(document.createTextNode('edit'));
-                li.appendChild(deleteBtn);
-                li.appendChild(editBtn);
-                editBtn.onclick = () => {
-                    var it = document.querySelector('input');
-                    localStorage.removeItem(userDetail.email);
-                    console.log(it.parentElement);
-                    document.getElementById('item').value = userDetail.name;
-                    document.getElementById('item1').value = userDetail.email;
-                    document.getElementById('item2').value = userDetail.phoneNumber;
+                editBtn.innerHTML = 'Edit';
 
-
-
-                }
+                li.appendChild((deleteBtn));
+                li.appendChild((editBtn));
                 itemList.appendChild(li);
+                //console.log(itemList);
             }
         })
         .catch((err) => {
             console.log(err);
         })
+
+
 })
-function storeData(e) {
-    e.preventDefault();
-    // Get Input Value:
-    userDetail.name = document.getElementById('item').value;
-    userDetail.email = document.getElementById('item1').value;
-    userDetail.phoneNumber = document.getElementById('item2').value;
-    axios.post('https://crudcrud.com/api/58c264e795be44e4aea092eb06c2c289/appointmentData', userDetail)
-        .then((responce => {
-            console.log(userDetail);
-        }))
+function removeItem(e) {
+    var newList = document.getElementById('items');
+    console.log(newList);
+    if (e.target.classList.contains('delete')) {
+        if (confirm('Are you sure')) {
+            var li = e.target.parentElement;
+            //itemList.removeChild(li);
+            itemList.removeChild(li);
+            console.log(li);
+            var chis = li.children[0]; // for particular list button.
+            // console.log(chis.id);  for particular list id.
+            axios.delete('https://crudcrud.com/api/2cb5a8ec863c4f6aabee0a0bbb4579a6/appointmentData/' + chis.id);
+
+
+        }
+    }
+}
+
+function removeFromCrud(userId) {
+    console.log(userId);
+    axios.delete('https://crudcrud.com/api/2cb5a8ec863c4f6aabee0a0bbb4579a6/appointmentData' + userId)
+        .then(response => {
+            console.log(response.data);
+        })
         .catch((err) => {
             console.log(err);
         })
-    var li = document.createElement('li');
-    //Add Class
-    li.className = 'list-group';
-
-    // Add text node with input value:
-    var list = '•' + userDetail.name + '-' + userDetail.email + '-' + userDetail.phoneNumber;
-    li.appendChild(document.createTextNode(list));
-
-    var deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete';
-    deleteBtn.style.width = '80px';
-    var editBtn = document.createElement('button');
-    editBtn.className = 'edit';
-    editBtn.style.width = '80px';
-    // Append text node for button
-    deleteBtn.appendChild(document.createTextNode('delete'));
-    //Append text node for edit button
-    editBtn.appendChild(document.createTextNode('edit'));
-    li.appendChild(deleteBtn);
-    li.appendChild(editBtn);
-    editBtn.onclick = () => {
-        var it = document.querySelector('input');
-        localStorage.removeItem(userDetail.email);
-        console.log(it.parentElement);
-        document.getElementById('item').value = userDetail.name;
-        document.getElementById('item1').value = userDetail.email;
-        document.getElementById('item2').value = userDetail.phoneNumber;
-    }
-    itemList.appendChild(li);
 }
-
-//Remove Item
-function removeItem(e) {
-    if (e.target.classList.contains('delete')) {
-        console.log(userDetail._id);
-        if (confirm('Are you sure')) {
-            var li = e.target.parentElement;
-
-            itemList.removeChild(li);
-        }
+function editDetails(e) {
+    if (e.target.classList.contains('edit')) {
+        console.log(userDetail.name);
+        document.getElementById('name').value = userDetail.name;
+        document.getElementById('email').value = userDetail.email;
+        document.getElementById('number').value = userDetail.number;
     }
 }
